@@ -3,1579 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HBG Schülerfirma</title>
+    <title>HBG IT & EVENTSOLUTION</title>
+    <!-- Google Fonts & FontAwesome für Icons -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- Tailwind CSS für modernes Styling -->
     <script src="https://jsdelivr.net"></script>
+    <!-- React & Babel laden, um den Code direkt im Browser auszuführen -->
+    <script src="https://unpkg.com" crossorigin></script>
+    <script src="https://unpkg.com" crossorigin></script>
+    <script src="https://unpkg.com"></script>
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans">
+<body class="bg-[#f0f4f8] text-[#0f172a]">
 
-    <!-- Das Gerüst, das dein Code zum Arbeiten braucht -->
-    <div id="app" class="min-h-screen"></div>
+    <!-- Hier wird die App injiziert -->
+    <div id="root"></div>
 
-    <script>
-    // HIER REINKLICTKEN UND DEINEN JAVASCRIPT-CODE EINFÜGEN!
-        import { useState, useEffect, useRef } from "react";
+    <!-- Ab hier läuft dein angepasster Code -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-// ─── DEFAULT CONFIG ───────────────────────────────────────────────────
-const DEFAULT_CONFIG = {
-  siteName: "HBG IT & EVENTSOLUTION",
-  siteTagline: "Dein internes Portal für IT-Lösungen und Eventmanagement",
-  heroSubtitle: "Schülerfirma • HBG Dortmund",
-  noTasksMessage: "Zurzeit wurden Ihnen keine Aufgaben zugeteilt. Genießen Sie die freie Zeit! 🎉",
-  logo: null,
-  theme: {
-    navBg: "#0a0f1e",
-    navText: "#94a3b8",
-    navActive: "#38bdf8",
-    accent: "#38bdf8",
-    accentSecondary: "#818cf8",
-    heroBg1: "#0a0f1e",
-    heroBg2: "#0f2044",
-    bodyBg: "#f0f4f8",
-    cardBg: "#ffffff",
-    textPrimary: "#0f172a",
-    textSecondary: "#64748b",
-  },
-  navItems: [
-    { id: "home", label: "🏠 Startseite", type: "internal", target: "home", roles: [] },
-    { id: "iserv", label: "📚 IServ", type: "external", target: "[hbgdo-edu.de](https://hbgdo-edu.de)", roles: [] },
-    { id: "untis", label: "📅 Untis", type: "external", target: "[hbgdo.webuntis.com](https://hbgdo.webuntis.com)", roles: [] },
-    { id: "ipad", label: "📱 iPad", type: "internal", target: "ipad", roles: [] },
-    { id: "kalender", label: "📆 Kalender", type: "internal", target: "kalender", roles: [] },
-    { id: "faq", label: "❓ FAQ", type: "internal", target: "faq", roles: [] },
-    { id: "benutzer", label: "👤 Mein Konto", type: "internal", target: "benutzer", roles: [] },
-  ],
-  roleCalendars: {},
-};
+        // ─── DEFAULT CONFIG ───────────────────────────────────────────────────
+        const DEFAULT_CONFIG = {
+          siteName: "HBG IT & EVENTSOLUTION",
+          siteTagline: "Dein internes Portal für IT-Lösungen und Eventmanagement",
+          heroSubtitle: "Schülerfirma • HBG Dortmund",
+          noTasksMessage: "Zurzeit wurden Ihnen keine Aufgaben zugeteilt. Genießen Sie die freie Zeit! 🎉",
+          logo: null,
+          theme: {
+            navBg: "#0a0f1e",
+            navText: "#94a3b8",
+            navActive: "#38bdf8",
+            accent: "#38bdf8",
+            accentSecondary: "#818cf8",
+            heroBg1: "#0a0f1e",
+            heroBg2: "#0f2044",
+            bodyBg: "#f0f4f8",
+            cardBg: "#ffffff",
+            textPrimary: "#0f172a",
+            textSecondary: "#64748b",
+          },
+          navItems: [
+            { id: "home", label: "🏠 Startseite", type: "internal", target: "home", roles: [] },
+            { id: "ipad", label: "📱 iPad", type: "internal", target: "ipad", roles: [] },
+            { id: "kalender", label: "📆 Kalender", type: "internal", target: "kalender", roles: [] },
+            { id: "faq", label: "❓ FAQ", type: "internal", target: "faq", roles: [] },
+            { id: "benutzer", label: "👤 Mein Konto", type: "internal", target: "benutzer", roles: [] },
+          ],
+        };
 
-const DEFAULT_ROLES = [
-  { id: 1, name: "Administrator", permissions: ["admin_panel","manage_users","manage_roles","edit_pages","manage_news","manage_faq","view_all","manage_nav","manage_theme","manage_calendar","manage_tasks"] },
-  { id: 2, name: "Lehrer", permissions: ["view_all","edit_pages","manage_calendar"] },
-  { id: 3, name: "IT-Support", permissions: ["view_all","manage_users","manage_tasks"] },
-  { id: 4, name: "Marketing", permissions: ["view_all","manage_news"] },
-  { id: 5, name: "Mini-IT", permissions: ["view_all","edit_pages","manage_faq","manage_calendar"] },
-  { id: 6, name: "Bühnentechnik", permissions: ["view_all","manage_calendar"] },
-  { id: 7, name: "Schüler", permissions: ["view_all"] },
-];
+        const DEFAULT_ROLES = [
+          { id: 1, name: "Administrator", permissions: ["admin_panel","manage_users","edit_pages","manage_news","manage_faq","view_all","manage_calendar","manage_tasks"] },
+          { id: 2, name: "Mitarbeiter", permissions: ["view_all"] }
+        ];
 
-const DEFAULT_USERS = [
-  { id: 1, username: "admin", passwordHash: "admin123", role: "Administrator", email: "admin@hbg-it.de", firstName: "Max", lastName: "Mustermann", classOrCode: "Admin", active: true },
-  { id: 2, username: "marketing1", passwordHash: "pass123", role: "Marketing", email: "marketing@hbg-it.de", firstName: "Lisa", lastName: "Schmidt", classOrCode: "MKT", active: true },
-  { id: 3, username: "technik1", passwordHash: "pass123", role: "Bühnentechnik", email: "technik@hbg-it.de", firstName: "Tom", lastName: "Weber", classOrCode: "10a", active: true },
-];
+        // HIER IST DEIN NEUER STANDARD-BENUTZER LOUIS HINTERLEGT
+        const DEFAULT_USERS = [
+          { id: 1, username: "louis", passwordHash: "louis", role: "Administrator", email: "louis@hbg-it.de", firstName: "Louis", lastName: "Mitarbeiter", classOrCode: "IT", active: true },
+          { id: 2, username: "admin", passwordHash: "admin123", role: "Administrator", email: "admin@hbg-it.de", firstName: "Max", lastName: "Mustermann", classOrCode: "Admin", active: true }
+        ];
 
-const DEFAULT_NEWS = [
-  { id: 1, title: "🎉 Willkommen bei HBG IT & EVENTSOLUTION!", content: "Wir sind gestartet! Hier findet ihr alle wichtigen Informationen rund um unsere Schülerfirma. Bleibt gespannt auf kommende Projekte und Events!", image: null, date: "2025-01-15", authorId: 1 },
-];
+        const DEFAULT_NEWS = [
+          { id: 1, title: "🎉 Willkommen bei HBG IT & EVENTSOLUTION!", content: "Wir sind gestartet! Hier findet ihr alle wichtigen Informationen rund um unsere Schülerfirma. Viel Spaß auf der neuen Plattform!", date: "2026-06-07" },
+        ];
 
-const DEFAULT_FAQ = [
-  { id: 1, question: "📧 Wie kann ich den IT-Support kontaktieren?", answer: "Schreibe uns eine E-Mail an support@hbg-it.de oder komm persönlich in Raum 214. Wir helfen dir gerne weiter!", file: null, fileType: null, fileName: null },
-  { id: 2, question: "💻 Mein iPad funktioniert nicht - was tun?", answer: "Versuche zunächst einen Neustart (Power + Home-Button 10 Sekunden halten). Falls das Problem weiterhin besteht, komm zu uns in den IT-Raum.", file: null, fileType: null, fileName: null },
-];
+        const DEFAULT_FAQ = [
+          { id: 1, question: "📧 Wie kann ich den IT-Support kontaktieren?", answer: "Schreibe uns eine E-Mail an support@hbg-it.de oder komm persönlich in Raum 214." }
+        ];
 
-const DEFAULT_PAGES = {
-  ipad: { title: "iPad-Bereich", icon: "📱", sections: [
-    { id: 1, heading: "📦 iPad-Ausgabe", content: "iPads werden zu Beginn des Schuljahres ausgegeben. Bei Defekten bitte direkt zum IT-Team in Raum 214 kommen." },
-    { id: 2, heading: "🔧 Reparatur & Support", content: "Kleinere Probleme lösen wir vor Ort. Bei größeren Defekten wird das Gerät eingeschickt - Ersatzgeräte sind verfügbar." },
-  ]},
-};
+        // ─── HAUPT-KOMPONENTE ───────────────────────────────────────────────────
+        function App() {
+          const [user, setUser] = useState(() => {
+            const saved = localStorage.getItem("current_user");
+            return saved ? JSON.parse(saved) : null;
+          });
+          const [users, setUsers] = useState(() => {
+            const saved = localStorage.getItem("platform_users");
+            return saved ? JSON.parse(saved) : DEFAULT_USERS;
+          });
+          const [news, setNews] = useState(DEFAULT_NEWS);
+          const [faqs, setFaqs] = useState(DEFAULT_FAQ);
+          const [currentTab, setCurrentTab] = useState("home");
+          
+          // Login-Formular-Daten
+          const [usernameInput, setUsernameInput] = useState("");
+          const [passwordInput, setPasswordInput] = useState("");
+          const [loginError, setLoginError] = useState("");
 
-const DEFAULT_TASKS = [];
-const DEFAULT_CALENDAR_EVENTS = [];
+          // Profil bearbeiten-Daten
+          const [newPassword, setNewPassword] = useState("");
+          const [profileMessage, setProfileMessage] = useState("");
 
-const ALL_PERMISSIONS = [
-  { id: "view_all", label: "Alle Seiten ansehen", icon: "👁️" },
-  { id: "edit_pages", label: "Seiten bearbeiten", icon: "✏️" },
-  { id: "manage_users", label: "Benutzer verwalten", icon: "👥" },
-  { id: "manage_roles", label: "Rollen verwalten", icon: "🛡️" },
-  { id: "admin_panel", label: "Admin-Panel", icon: "⚙️" },
-  { id: "manage_news", label: "News verwalten", icon: "📰" },
-  { id: "manage_faq", label: "FAQ verwalten", icon: "❓" },
-  { id: "manage_nav", label: "Navigation verwalten", icon: "🔗" },
-  { id: "manage_theme", label: "Design anpassen", icon: "🎨" },
-  { id: "manage_calendar", label: "Kalender verwalten", icon: "📆" },
-  { id: "manage_tasks", label: "Aufgaben zuweisen", icon: "✅" },
-];
+          // Neuer Benutzer-Daten (Admin-Panel)
+          const [newUsername, setNewUsername] = useState("");
+          const [newPasswordAdmin, setNewPasswordAdmin] = useState("");
+          const [newRole, setNewRole] = useState("Mitarbeiter");
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function hasPerm(user, roles, perm) {
-  if (!user) return false;
-  const role = roles.find(r => r.name === user.role);
-  return role?.permissions?.includes(perm) ?? false;
-}
+          useEffect(() => {
+            localStorage.setItem("platform_users", JSON.stringify(users));
+          }, [users]);
 
-function useLocalStorage(key, def) {
-  const [val, setVal] = useState(() => {
-    try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : def; } catch { return def; }
-  });
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }, [key, val]);
-  return [val, setVal];
-}
+          const handleLogin = (e) => {
+            e.preventDefault();
+            const foundUser = users.find(u => u.username.toLowerCase() === usernameInput.toLowerCase() && u.passwordHash === passwordInput && u.active);
+            if (foundUser) {
+              setUser(foundUser);
+              localStorage.setItem("current_user", JSON.stringify(foundUser));
+              setLoginError("");
+            } else {
+              setLoginError("❌ Benutzername oder Passwort falsch/inaktiv.");
+            }
+          };
 
-function formatDate(d) {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
-}
+          const handleLogout = () => {
+            setUser(null);
+            localStorage.removeItem("current_user");
+            setCurrentTab("home");
+          };
 
-function formatDateShort(d) {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
-}
+          const handlePasswordChange = (e) => {
+            e.preventDefault();
+            if(!newPassword) return;
+            const updatedUsers = users.map(u => u.id === user.id ? { ...u, passwordHash: newPassword } : u);
+            setUsers(updatedUsers);
+            setUser({ ...user, passwordHash: newPassword });
+            setNewPassword("");
+            setProfileMessage("✅ Passwort erfolgreich geändert!");
+            setTimeout(() => setProfileMessage(""), 3000);
+          };
 
-function getUserDisplayName(user) {
-  if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
-  if (user.firstName) return user.firstName;
-  return user.username;
-}
+          const handleCreateUser = (e) => {
+            e.preventDefault();
+            if(!newUsername || !newPasswordAdmin) return;
+            const newUserObj = {
+              id: users.length + 1,
+              username: newUsername,
+              passwordHash: newPasswordAdmin,
+              role: newRole,
+              email: `${newUsername}@hbg-it.de`,
+              firstName: newUsername,
+              lastName: "User",
+              classOrCode: "Standard",
+              active: true
+            };
+            setUsers([...users, newUserObj]);
+            setNewUsername("");
+            setNewPasswordAdmin("");
+            alert(`Mitarbeiter "${newUsername}" wurde erfolgreich angelegt!`);
+          };
 
-function getUserInitials(user) {
-  if (user.firstName && user.lastName) return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
-  return user.username[0].toUpperCase();
-}
-
-// ─── LOGIN MODAL ─────────────────────────────────────────────────────────────
-function LoginModal({ onLogin, users, config }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [shake, setShake] = useState(false);
-  const t = config.theme;
-
-  const submit = () => {
-    const u = users.find(u => u.username === username && u.passwordHash === password && u.active);
-    if (u) { onLogin(u); } else {
-      setError("🚫 Benutzername oder Passwort falsch.");
-      setShake(true); setTimeout(() => setShake(false), 500);
-    }
-  };
-
-  return (
-    <div style={{ position:"fixed",inset:0,background:`linear-gradient(135deg,${t.heroBg1},${t.heroBg2})`,display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000 }}>
-      <div style={{ background:"#fff",borderRadius:20,padding:"44px 48px",width:420,maxWidth:"92vw",boxShadow:"0 32px 80px rgba(0,0,0,0.45)", animation: shake?"shake 0.4s ease":"fadeIn 0.4s ease" }}>
-        <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:32 }}>
-          {config.logo ? (
-            <img src={config.logo} alt="Logo" style={{ width:48,height:48,borderRadius:12,objectFit:"contain" }} />
-          ) : (
-            <div style={{ width:48,height:48,borderRadius:12,background:`linear-gradient(135deg,${t.accent},${t.accentSecondary})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24 }}>⚡</div>
-          )}
-          <div>
-            <div style={{ fontSize:18,fontWeight:800,color:"#0f172a",lineHeight:1,fontFamily:"'Outfit',sans-serif" }}>{config.siteName}</div>
-            <div style={{ fontSize:12,color:"#64748b",marginTop:2 }}>Mitarbeiter-Portal</div>
-          </div>
-        </div>
-        <div style={{ fontSize:22,fontWeight:700,color:"#0f172a",marginBottom:4 }}>🔐 Anmelden</div>
-        <div style={{ fontSize:14,color:"#64748b",marginBottom:28 }}>Bitte melde dich mit deinen Zugangsdaten an</div>
-        {[["👤 Benutzername","text",username,setUsername],["🔑 Passwort","password",password,setPassword]].map(([lbl,type,val,set]) => (
-          <div key={lbl} style={{ marginBottom:16 }}>
-            <label style={{ display:"block",fontSize:13,fontWeight:600,color:"#374151",marginBottom:6 }}>{lbl}</label>
-            <input type={type} value={val} onChange={e=>set(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}
-              style={{ width:"100%",padding:"11px 14px",border:"2px solid #e2e8f0",borderRadius:10,fontSize:14,fontFamily:"'Outfit',sans-serif",outline:"none",color:"#1e293b" }} />
-          </div>
-        ))}
-        {error && <div style={{ background:"#fef2f2",color:"#dc2626",padding:"10px 14px",borderRadius:8,fontSize:13,marginBottom:14,border:"1px solid #fecaca" }}>{error}</div>}
-        <button onClick={submit} style={{ width:"100%",padding:"13px",background:`linear-gradient(135deg,${t.accent},${t.accentSecondary})`,color:"#fff",border:"none",borderRadius:10,fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"'Outfit',sans-serif",marginTop:4 }}>
-          Anmelden →
-        </button>
-        <div style={{ textAlign:"center",fontSize:11,color:"#94a3b8",marginTop:16,fontFamily:"monospace" }}>Demo: admin / admin123</div>
-      </div>
-    </div>
-  );
-}
-
-// ─── NAVBAR ──────────────────────────────────────────────────────────────────
-function Navbar({ user, roles, config, activePage, setActivePage, setAdminView, onLogout, canManageNews }) {
-  const t = config.theme;
-  const isAdmin = hasPerm(user, roles, "admin_panel");
-  
-  const visibleItems = config.navItems.filter(item => {
-    if (item.roles && item.roles.length > 0) return item.roles.includes(user.role);
-    return true;
-  });
-
-  const handleNav = (item) => {
-    if (item.type === "external") { window.open(item.target, "_blank"); return; }
-    setAdminView(null);
-    setActivePage(item.target);
-  };
-
-  return (
-    <nav style={{ background:t.navBg,display:"flex",alignItems:"center",padding:"0 24px",height:60,position:"sticky",top:0,zIndex:200,borderBottom:`1px solid rgba(255,255,255,0.07)`,gap:4 }}>
-      <div onClick={()=>{setActivePage("home");setAdminView(null);}} style={{ display:"flex",alignItems:"center",gap:10,cursor:"pointer",marginRight:16,flexShrink:0 }}>
-        {config.logo ? (
-          <img src={config.logo} alt="Logo" style={{ width:32,height:32,borderRadius:8,objectFit:"contain" }} />
-        ) : (
-          <div style={{ width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${t.accent},${t.accentSecondary})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16 }}>⚡</div>
-        )}
-        <span style={{ fontSize:15,fontWeight:800,color:"#fff",letterSpacing:"-0.3px",whiteSpace:"nowrap",fontFamily:"'Outfit',sans-serif" }}>{config.siteName}</span>
-      </div>
-      <div style={{ display:"flex",gap:2,flex:1,overflowX:"auto" }}>
-        {visibleItems.map(item => {
-          const isActive = activePage === item.target && item.type === "internal";
-          return (
-            <button key={item.id} onClick={()=>handleNav(item)}
-              style={{ padding:"6px 13px",background:isActive?`rgba(56,189,248,0.15)`:"transparent",border:"none",color:isActive?t.navActive:t.navText,cursor:"pointer",borderRadius:7,fontSize:13,fontWeight:500,whiteSpace:"nowrap",fontFamily:"'Outfit',sans-serif",display:"flex",alignItems:"center",gap:4,transition:"all 0.15s" }}>
-              {item.type === "external" && <span style={{ fontSize:10 }}>↗</span>}{item.label}
-            </button>
-          );
-        })}
-        {/* News für Nicht-Admins mit Berechtigung */}
-        {!isAdmin && canManageNews && (
-          <button onClick={()=>{setActivePage("news-manage");setAdminView(null);}}
-            style={{ padding:"6px 13px",background:activePage==="news-manage"?`rgba(56,189,248,0.15)`:"transparent",border:"none",color:activePage==="news-manage"?t.navActive:t.navText,cursor:"pointer",borderRadius:7,fontSize:13,fontWeight:500,fontFamily:"'Outfit',sans-serif" }}>📰 News verwalten</button>
-        )}
-        {isAdmin && (
-          <button onClick={()=>{setActivePage(null);setAdminView("dashboard");}}
-            style={{ padding:"6px 13px",background:"transparent",border:"none",color:"#fb923c",cursor:"pointer",borderRadius:7,fontSize:13,fontWeight:600,fontFamily:"'Outfit',sans-serif" }}>⚙️ Admin</button>
-        )}
-      </div>
-      <div style={{ display:"flex",alignItems:"center",gap:10,flexShrink:0 }}>
-        <div style={{ display:"flex",alignItems:"center",gap:8 }}>
-          <div style={{ width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${t.accent},${t.accentSecondary})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:13 }}>{getUserInitials(user)}</div>
-          <div style={{ lineHeight:1.2 }}>
-            <div style={{ fontSize:13,fontWeight:600,color:"#f1f5f9" }}>{getUserDisplayName(user)}</div>
-            <div style={{ fontSize:10,color:"#475569" }}>{user.role} {user.classOrCode && `• ${user.classOrCode}`}</div>
-          </div>
-        </div>
-        <button onClick={onLogout} style={{ padding:"6px 12px",background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",color:"#94a3b8",borderRadius:7,cursor:"pointer",fontSize:12,fontFamily:"'Outfit',sans-serif" }}>🚪 Abmelden</button>
-      </div>
-    </nav>
-  );
-}
-
-// ─── CALENDAR COMPONENT ──────────────────────────────────────────────────────
-function CalendarWidget({ events, userRole, config, canManage, onAddEvent, onDeleteEvent }) {
-  const t = config.theme;
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", date: "", forRoles: [] });
-
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const startDay = firstDay === 0 ? 6 : firstDay - 1;
-
-  const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-
-  const filteredEvents = events.filter(ev => {
-    if (ev.forRoles && ev.forRoles.length > 0) return ev.forRoles.includes(userRole);
-    return true;
-  });
-
-  const getEventsForDay = (day) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return filteredEvents.filter(ev => ev.date === dateStr);
-  };
-
-  const saveEvent = () => {
-    if (!form.title || !form.date) return;
-    onAddEvent({ ...form, id: Date.now() });
-    setForm({ title: "", description: "", date: "", forRoles: [] });
-    setShowForm(false);
-  };
-
-  return (
-    <div style={{ background: "#fff", borderRadius: 16, padding: 24, border: "1px solid #e2e8f0", boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 800, color: t.textPrimary, fontFamily: "'Outfit',sans-serif" }}>📆 Kalender</h3>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button onClick={() => setCurrentDate(new Date(year, month - 1))} style={S.iconBtn}>◀</button>
-          <span style={{ fontSize: 14, fontWeight: 600, color: t.textPrimary, minWidth: 120, textAlign: "center" }}>{monthNames[month]} {year}</span>
-          <button onClick={() => setCurrentDate(new Date(year, month + 1))} style={S.iconBtn}>▶</button>
-          {canManage && <button onClick={() => setShowForm(true)} style={{ ...S.primaryBtn, padding: "6px 14px", fontSize: 12, marginLeft: 8 }}>+ Event</button>}
-        </div>
-      </div>
-
-      {showForm && (
-        <div style={{ background: "#f8fafc", borderRadius: 12, padding: 16, marginBottom: 16, border: "1px solid #e2e8f0" }}>
-          <div style={{ marginBottom: 10 }}>
-            <label style={S.label}>📌 Titel</label>
-            <input style={S.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Event-Titel..." />
-          </div>
-          <div style={{ marginBottom: 10 }}>
-            <label style={S.label}>📅 Datum</label>
-            <input type="date" style={S.input} value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-          </div>
-          <div style={{ marginBottom: 10 }}>
-            <label style={S.label}>📝 Beschreibung</label>
-            <textarea style={{ ...S.input, minHeight: 60 }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optionale Beschreibung..." />
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={saveEvent} style={S.primaryBtn}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 8 }}>
-        {["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map(d => (
-          <div key={d} style={{ textAlign: "center", fontSize: 11, fontWeight: 700, color: t.textSecondary, padding: 4 }}>{d}</div>
-        ))}
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
-        {Array(startDay).fill(null).map((_, i) => <div key={`empty-${i}`} />)}
-        {Array(daysInMonth).fill(null).map((_, i) => {
-          const day = i + 1;
-          const dayEvents = getEventsForDay(day);
-          const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
-          return (
-            <div key={day} style={{ minHeight: 50, padding: 4, background: isToday ? `${t.accent}15` : "#f8fafc", borderRadius: 8, border: isToday ? `2px solid ${t.accent}` : "1px solid #e2e8f0" }}>
-              <div style={{ fontSize: 12, fontWeight: isToday ? 700 : 500, color: isToday ? t.accent : t.textPrimary }}>{day}</div>
-              {dayEvents.slice(0, 2).map(ev => (
-                <div key={ev.id} style={{ fontSize: 9, background: t.accent, color: "#fff", borderRadius: 4, padding: "2px 4px", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {ev.title}
-                </div>
-              ))}
-              {dayEvents.length > 2 && <div style={{ fontSize: 9, color: t.textSecondary }}>+{dayEvents.length - 2}</div>}
-            </div>
-          );
-        })}
-      </div>
-
-      {filteredEvents.length > 0 && (
-        <div style={{ marginTop: 20 }}>
-          <h4 style={{ fontSize: 14, fontWeight: 700, color: t.textPrimary, marginBottom: 10 }}>📋 Kommende Events</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 5).map(ev => (
-              <div key={ev.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: t.textPrimary }}>{ev.title}</div>
-                  <div style={{ fontSize: 11, color: t.textSecondary }}>{formatDate(ev.date)}</div>
-                </div>
-                {canManage && <button onClick={() => onDeleteEvent(ev.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── TASKS WIDGET ────────────────────────────────────────────────────────────
-function TasksWidget({ tasks, user, config, canManage, allUsers, onToggleTask }) {
-  const t = config.theme;
-  const myTasks = tasks.filter(task => task.assignedTo === user.id);
-
-  return (
-    <div style={{ background: "#fff", borderRadius: 16, padding: 24, border: "1px solid #e2e8f0", boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
-      <h3 style={{ fontSize: 18, fontWeight: 800, color: t.textPrimary, marginBottom: 16, fontFamily: "'Outfit',sans-serif" }}>✅ Meine Aufgaben</h3>
-      
-      {myTasks.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "32px 16px", background: "#f0fdf4", borderRadius: 12, border: "1px solid #bbf7d0" }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>🎉</div>
-          <div style={{ fontSize: 14, color: "#16a34a", fontWeight: 500 }}>{config.noTasksMessage}</div>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {myTasks.map(task => (
-            <div key={task.id} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: 14, background: task.completed ? "#f0fdf4" : "#fffbeb", borderRadius: 10, border: `1px solid ${task.completed ? "#bbf7d0" : "#fde68a"}` }}>
-              <button onClick={() => onToggleTask(task.id)} style={{ width: 24, height: 24, borderRadius: 6, border: `2px solid ${task.completed ? "#22c55e" : "#f59e0b"}`, background: task.completed ? "#22c55e" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, flexShrink: 0 }}>
-                {task.completed && "✓"}
-              </button>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: t.textPrimary, textDecoration: task.completed ? "line-through" : "none" }}>{task.title}</div>
-                {task.description && <div style={{ fontSize: 12, color: t.textSecondary, marginTop: 4 }}>{task.description}</div>}
-                <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>📅 Fällig: {formatDate(task.dueDate)}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── HOME PAGE ────────────────────────────────────────────────────────────────
-function HomePage({ user, roles, news, setNews, config, users, tasks, setTasks, calendarEvents, setCalendarEvents }) {
-  const t = config.theme;
-  const canNews = hasPerm(user, roles, "manage_news");
-  const canCalendar = hasPerm(user, roles, "manage_calendar");
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", content: "", image: null });
-  const [editId, setEditId] = useState(null);
-  const fileRef = useRef();
-
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => setForm(f => ({ ...f, image: ev.target.result }));
-    reader.readAsDataURL(file);
-  };
-
-  const save = () => {
-    if (!form.title) return;
-    const entry = { ...form, date: new Date().toISOString().split("T")[0], authorId: user.id };
-    if (editId) {
-      setNews(prev => prev.map(n => n.id === editId ? { ...n, ...entry } : n));
-    } else {
-      setNews(prev => [{ ...entry, id: Date.now() }, ...prev]);
-    }
-    setForm({ title: "", content: "", image: null }); setShowForm(false); setEditId(null);
-  };
-
-  const remove = (id) => { if (confirm("News löschen?")) setNews(prev => prev.filter(n => n.id !== id)); };
-  const startEdit = (n) => { setForm({ title: n.title, content: n.content, image: n.image || null }); setEditId(n.id); setShowForm(true); };
-
-  const getAuthorInfo = (authorId) => {
-    const author = users.find(u => u.id === authorId);
-    if (!author) return { name: "Unbekannt", code: "" };
-    return { name: getUserDisplayName(author), code: author.classOrCode || "" };
-  };
-
-  const handleToggleTask = (taskId) => {
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t));
-  };
-
-  return (
-    <div>
-      <div style={{ background: `linear-gradient(135deg,${t.heroBg1} 0%,${t.heroBg2} 100%)`, padding: "60px 48px 48px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle,${t.accent}22,transparent 70%)`, pointerEvents: "none" }} />
-        <div style={{ position: "relative" }}>
-          <div style={{ fontSize: 13, color: t.accent, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 14, fontFamily: "monospace" }}>{config.heroSubtitle}</div>
-          <h1 style={{ fontSize: "clamp(28px,5vw,52px)", fontWeight: 900, color: "#fff", lineHeight: 1.1, marginBottom: 16, fontFamily: "'Outfit',sans-serif" }}>{config.siteName}</h1>
-          <p style={{ fontSize: 16, color: "#94a3b8", maxWidth: 540 }}>{config.siteTagline}</p>
-          <div style={{ marginTop: 20, padding: "12px 18px", background: "rgba(255,255,255,0.08)", borderRadius: 10, display: "inline-flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 24 }}>👋</span>
-            <div>
-              <div style={{ fontSize: 14, color: "#f1f5f9", fontWeight: 600 }}>Willkommen zurück, {getUserDisplayName(user)}!</div>
-              <div style={{ fontSize: 12, color: "#94a3b8" }}>{user.role} {user.classOrCode && `• ${user.classOrCode}`}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, padding: "36px 48px", maxWidth: 1400, margin: "0 auto" }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: t.textPrimary, fontFamily: "'Outfit',sans-serif" }}>📰 Neuigkeiten</h2>
-            {canNews && hasPerm(user, roles, "admin_panel") && (
-              <button onClick={() => { setForm({ title: "", content: "", image: null }); setEditId(null); setShowForm(true); }} style={{ padding: "8px 18px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>+ News hinzufügen</button>
-            )}
-          </div>
-
-          {showForm && canNews && (
-            <div style={{ background: "#fff", borderRadius: 16, padding: 28, border: "1px solid #e2e8f0", marginBottom: 24, boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
-              <h3 style={{ margin: "0 0 18px", fontSize: 16, fontWeight: 700, color: t.textPrimary }}>{editId ? "✏️ News bearbeiten" : "📝 Neue News"}</h3>
-              <div style={{ marginBottom: 12 }}>
-                <label style={S.label}>📌 Titel</label>
-                <input style={S.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Titel der News..." />
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <label style={S.label}>📝 Text</label>
-                <textarea style={{ ...S.input, minHeight: 100, resize: "vertical" }} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Inhalt..." />
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={S.label}>🖼️ Bild (optional)</label>
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <button onClick={() => fileRef.current.click()} style={{ padding: "8px 16px", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>📷 Bild wählen</button>
-                  {form.image && <span style={{ fontSize: 12, color: "#22c55e" }}>✓ Bild geladen</span>}
-                  {form.image && <button onClick={() => setForm(f => ({ ...f, image: null }))} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>✕ Entfernen</button>}
-                </div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImage} />
-                {form.image && <img src={form.image} alt="" style={{ marginTop: 10, maxHeight: 160, borderRadius: 8, border: "1px solid #e2e8f0" }} />}
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={save} style={{ padding: "9px 20px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>💾 Speichern</button>
-                <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {news.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8", padding: "48px 0" }}>📭 Noch keine News vorhanden.</div>}
-            {news.map(n => {
-              const author = getAuthorInfo(n.authorId);
-              return (
-                <div key={n.id} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-                  {n.image && <img src={n.image} alt={n.title} style={{ width: "100%", maxHeight: 280, objectFit: "cover" }} />}
-                  <div style={{ padding: 24 }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                      <div style={{ flex: 1 }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 800, color: t.textPrimary, marginBottom: 8, fontFamily: "'Outfit',sans-serif" }}>{n.title}</h3>
-                        <p style={{ fontSize: 14, color: t.textSecondary, lineHeight: 1.7, marginBottom: 12 }}>{n.content}</p>
-                        <div style={{ fontSize: 12, color: "#94a3b8", display: "flex", alignItems: "center", gap: 12 }}>
-                          <span>📅 {formatDate(n.date)}</span>
-                          <span>✍️ {author.name} {author.code && `(${author.code})`}</span>
-                        </div>
-                      </div>
-                      {canNews && hasPerm(user, roles, "admin_panel") && (
-                        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                          <button onClick={() => startEdit(n)} style={S.iconBtn}>✏️</button>
-                          <button onClick={() => remove(n.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>
-                        </div>
-                      )}
+          // ─── LOGIN-OBERFLÄCHE ───────────────────────────────────────────────
+          if (!user) {
+            return (
+              <div class="fixed inset-0 bg-gradient-to-br from-[#0a0f1e] to-[#0f2044] flex items-center justify-center p-4">
+                <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md animate-fade-in">
+                  <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#38bdf8] to-[#818cf8] flex items-center justify-center text-white text-2xl font-bold">⚡</div>
+                    <div>
+                      <h1 class="text-xl font-extrabold text-[#0f172a]">{DEFAULT_CONFIG.siteName}</h1>
+                      <p class="text-xs text-gray-500">Mitarbeiter-Portal</p>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <TasksWidget 
-            tasks={tasks} 
-            user={user} 
-            config={config} 
-            canManage={false} 
-            allUsers={users}
-            onToggleTask={handleToggleTask}
-          />
-          <CalendarWidget
-            events={calendarEvents}
-            userRole={user.role}
-            config={config}
-            canManage={canCalendar}
-            onAddEvent={(ev) => setCalendarEvents(prev => [...prev, ev])}
-            onDeleteEvent={(id) => setCalendarEvents(prev => prev.filter(e => e.id !== id))}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── CALENDAR PAGE ───────────────────────────────────────────────────────────
-function CalendarPage({ user, roles, config, calendarEvents, setCalendarEvents }) {
-  const t = config.theme;
-  const canCalendar = hasPerm(user, roles, "manage_calendar");
-
-  return (
-    <div style={{ padding: "40px 48px", maxWidth: 900, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 900, color: t.textPrimary, marginBottom: 8, fontFamily: "'Outfit',sans-serif" }}>📆 Kalender</h1>
-      <p style={{ color: t.textSecondary, marginBottom: 32, fontSize: 14 }}>Alle wichtigen Termine und Events auf einen Blick</p>
-      
-      <CalendarWidget
-        events={calendarEvents}
-        userRole={user.role}
-        config={config}
-        canManage={canCalendar}
-        onAddEvent={(ev) => setCalendarEvents(prev => [...prev, ev])}
-        onDeleteEvent={(id) => setCalendarEvents(prev => prev.filter(e => e.id !== id))}
-      />
-    </div>
-  );
-}
-
-// ─── NEWS MANAGE PAGE (for non-admins with permission) ──────────────────────
-function NewsManagePage({ user, roles, news, setNews, config, users }) {
-  const t = config.theme;
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", content: "", image: null });
-  const [editId, setEditId] = useState(null);
-  const fileRef = useRef();
-
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => setForm(f => ({ ...f, image: ev.target.result }));
-    reader.readAsDataURL(file);
-  };
-
-  const save = () => {
-    if (!form.title) return;
-    const entry = { ...form, date: new Date().toISOString().split("T")[0], authorId: user.id };
-    if (editId) {
-      setNews(prev => prev.map(n => n.id === editId ? { ...n, ...entry } : n));
-    } else {
-      setNews(prev => [{ ...entry, id: Date.now() }, ...prev]);
-    }
-    setForm({ title: "", content: "", image: null }); setShowForm(false); setEditId(null);
-  };
-
-  const remove = (id) => { if (confirm("News löschen?")) setNews(prev => prev.filter(n => n.id !== id)); };
-  const startEdit = (n) => { setForm({ title: n.title, content: n.content, image: n.image || null }); setEditId(n.id); setShowForm(true); };
-
-  const getAuthorInfo = (authorId) => {
-    const author = users.find(u => u.id === authorId);
-    if (!author) return { name: "Unbekannt", code: "" };
-    return { name: getUserDisplayName(author), code: author.classOrCode || "" };
-  };
-
-  return (
-    <div style={{ padding: "40px 48px", maxWidth: 900, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
-        <div>
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: t.textPrimary, fontFamily: "'Outfit',sans-serif" }}>📰 News verwalten</h1>
-          <p style={{ color: t.textSecondary, marginTop: 4, fontSize: 14 }}>Erstelle und bearbeite Neuigkeiten</p>
-        </div>
-        <button onClick={() => { setForm({ title: "", content: "", image: null }); setEditId(null); setShowForm(true); }} style={{ padding: "9px 20px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>+ News hinzufügen</button>
-      </div>
-
-      {showForm && (
-        <div style={{ background: "#fff", borderRadius: 16, padding: 28, border: "1px solid #e2e8f0", marginBottom: 24 }}>
-          <h3 style={{ margin: "0 0 18px", fontSize: 16, fontWeight: 700 }}>{editId ? "✏️ News bearbeiten" : "📝 Neue News"}</h3>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>📌 Titel</label>
-            <input style={S.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Titel..." />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>📝 Text</label>
-            <textarea style={{ ...S.input, minHeight: 100, resize: "vertical" }} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Inhalt..." />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={S.label}>🖼️ Bild (optional)</label>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <button onClick={() => fileRef.current.click()} style={{ padding: "8px 16px", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>📷 Bild wählen</button>
-              {form.image && <span style={{ fontSize: 12, color: "#22c55e" }}>✓ Bild geladen</span>}
-              {form.image && <button onClick={() => setForm(f => ({ ...f, image: null }))} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>✕</button>}
-            </div>
-            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImage} />
-            {form.image && <img src={form.image} alt="" style={{ marginTop: 10, maxHeight: 160, borderRadius: 8, border: "1px solid #e2e8f0" }} />}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={{ padding: "9px 20px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {news.map(n => {
-          const author = getAuthorInfo(n.authorId);
-          return (
-            <div key={n.id} style={{ background: "#fff", borderRadius: 14, padding: 18, border: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: 16 }}>
-              {n.image && <img src={n.image} alt="" style={{ width: 60, height: 60, borderRadius: 8, objectFit: "cover" }} />}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: t.textPrimary }}>{n.title}</div>
-                <div style={{ fontSize: 12, color: t.textSecondary, marginTop: 4 }}>📅 {formatDate(n.date)} · ✍️ {author.name}</div>
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => startEdit(n)} style={S.iconBtn}>✏️</button>
-                <button onClick={() => remove(n.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>
-              </div>
-            </div>
-          );
-        })}
-        {news.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8", padding: "48px 0" }}>📭 Noch keine News vorhanden.</div>}
-      </div>
-    </div>
-  );
-}
-
-// ─── FAQ PAGE ─────────────────────────────────────────────────────────────────
-function FAQPage({ user, roles, faq, setFaq, config }) {
-  const t = config.theme;
-  const canFaq = hasPerm(user, roles, "manage_faq");
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ question: "", answer: "", file: null, fileType: null, fileName: null });
-  const [editId, setEditId] = useState(null);
-  const [open, setOpen] = useState(null);
-  const fileRef = useRef();
-
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => setForm(f => ({ ...f, file: ev.target.result, fileType: file.type, fileName: file.name }));
-    reader.readAsDataURL(file);
-  };
-
-  const save = () => {
-    if (!form.question) return;
-    if (editId) {
-      setFaq(prev => prev.map(f => f.id === editId ? { ...f, ...form } : f));
-    } else {
-      setFaq(prev => [...prev, { ...form, id: Date.now() }]);
-    }
-    setForm({ question: "", answer: "", file: null, fileType: null, fileName: null });
-    setShowForm(false); setEditId(null);
-  };
-
-  const remove = (id) => { if (confirm("FAQ löschen?")) setFaq(prev => prev.filter(f => f.id !== id)); };
-  const startEdit = (f) => { setForm({ question: f.question, answer: f.answer, file: f.file || null, fileType: f.fileType || null, fileName: f.fileName || null }); setEditId(f.id); setShowForm(true); };
-
-  return (
-    <div style={{ padding: "40px 48px", maxWidth: 820, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
-        <div>
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: t.textPrimary, fontFamily: "'Outfit',sans-serif" }}>❓ FAQ</h1>
-          <p style={{ color: t.textSecondary, marginTop: 4, fontSize: 14 }}>Häufig gestellte Fragen & Anleitungen</p>
-        </div>
-        {canFaq && <button onClick={() => { setForm({ question: "", answer: "", file: null, fileType: null, fileName: null }); setEditId(null); setShowForm(true); }} style={{ padding: "9px 20px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>+ Eintrag hinzufügen</button>}
-      </div>
-
-      {showForm && canFaq && (
-        <div style={{ background: "#fff", borderRadius: 16, padding: 28, border: "1px solid #e2e8f0", marginBottom: 24 }}>
-          <h3 style={{ margin: "0 0 18px", fontSize: 16, fontWeight: 700 }}>{editId ? "✏️ FAQ bearbeiten" : "📝 Neuer FAQ-Eintrag"}</h3>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>❓ Frage</label>
-            <input style={S.input} value={form.question} onChange={e => setForm(f => ({ ...f, question: e.target.value }))} placeholder="Wie kann ich..." />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>💬 Antwort</label>
-            <textarea style={{ ...S.input, minHeight: 80, resize: "vertical" }} value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))} placeholder="Antwort..." />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={S.label}>📎 Anhang (PDF oder Bild, optional)</label>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <button onClick={() => fileRef.current.click()} style={{ padding: "8px 16px", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>📎 Datei wählen</button>
-              {form.fileName && <span style={{ fontSize: 12, color: "#22c55e" }}>✓ {form.fileName}</span>}
-              {form.file && <button onClick={() => setForm(f => ({ ...f, file: null, fileType: null, fileName: null }))} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>✕</button>}
-            </div>
-            <input ref={fileRef} type="file" accept="image/*,.pdf" style={{ display: "none" }} onChange={handleFile} />
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={{ padding: "9px 20px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {faq.map(f => (
-          <div key={f.id} style={{ background: "#fff", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>
-            <div onClick={() => setOpen(open === f.id ? null : f.id)} style={{ padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-              <span style={{ fontWeight: 700, color: t.textPrimary, fontSize: 15, fontFamily: "'Outfit',sans-serif" }}>{f.question}</span>
-              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                {canFaq && <><button onClick={e => { e.stopPropagation(); startEdit(f); }} style={S.iconBtn}>✏️</button><button onClick={e => { e.stopPropagation(); remove(f.id); }} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button></>}
-                <span style={{ color: "#94a3b8", fontSize: 18, marginLeft: 4 }}>{open === f.id ? "▲" : "▼"}</span>
-              </div>
-            </div>
-            {open === f.id && (
-              <div style={{ borderTop: "1px solid #f1f5f9", padding: "16px 22px" }}>
-                <p style={{ color: t.textSecondary, lineHeight: 1.7, fontSize: 14, marginBottom: f.file ? 14 : 0 }}>{f.answer}</p>
-                {f.file && f.fileType?.startsWith("image/") && (
-                  <img src={f.file} alt={f.fileName} style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 8, border: "1px solid #e2e8f0" }} />
-                )}
-                {f.file && f.fileType === "application/pdf" && (
-                  <a href={f.file} download={f.fileName} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", background: "#eff6ff", color: "#2563eb", borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
-                    📄 {f.fileName} herunterladen
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-        {faq.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8", padding: "48px 0" }}>📭 Noch keine FAQ-Einträge vorhanden.</div>}
-      </div>
-    </div>
-  );
-}
-
-// ─── MY ACCOUNT ──────────────────────────────────────────────────────────────
-function AccountPage({ user, setUsers, config }) {
-  const t = config.theme;
-  const [form, setForm] = useState({ email: user.email, firstName: user.firstName || "", lastName: user.lastName || "" });
-  const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
-  const [saved, setSaved] = useState(false);
-  const [pwMsg, setPwMsg] = useState("");
-
-  const saveProfile = () => {
-    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, email: form.email, firstName: form.firstName, lastName: form.lastName } : u));
-    setSaved(true); setTimeout(() => setSaved(false), 2000);
-  };
-
-  const changePw = () => {
-    if (pwForm.current !== user.passwordHash) { setPwMsg("❌ Aktuelles Passwort falsch."); return; }
-    if (pwForm.newPw.length < 6) { setPwMsg("❌ Neues Passwort zu kurz (min. 6 Zeichen)."); return; }
-    if (pwForm.newPw !== pwForm.confirm) { setPwMsg("❌ Passwörter stimmen nicht überein."); return; }
-    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, passwordHash: pwForm.newPw } : u));
-    setPwMsg("✅ Passwort geändert!"); setPwForm({ current: "", newPw: "", confirm: "" });
-    setTimeout(() => setPwMsg(""), 3000);
-  };
-
-  return (
-    <div style={{ padding: "40px 48px", maxWidth: 680, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 900, color: t.textPrimary, marginBottom: 6, fontFamily: "'Outfit',sans-serif" }}>👤 Mein Konto</h1>
-      <p style={{ color: t.textSecondary, marginBottom: 32, fontSize: 14 }}>Verwalte deine persönlichen Daten</p>
-
-      <div style={{ background: "#fff", borderRadius: 16, padding: 28, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: t.textPrimary, marginBottom: 20 }}>✏️ Profil bearbeiten</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-          <div>
-            <label style={S.label}>👤 Benutzername (nur Login)</label>
-            <input style={{ ...S.input, background: "#f8fafc", color: "#94a3b8" }} value={user.username} disabled />
-          </div>
-          <div>
-            <label style={S.label}>🛡️ Rolle</label>
-            <input style={{ ...S.input, background: "#f8fafc", color: "#94a3b8" }} value={user.role} disabled />
-          </div>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-          <div>
-            <label style={S.label}>📛 Vorname</label>
-            <input style={S.input} value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder="Dein Vorname" />
-          </div>
-          <div>
-            <label style={S.label}>📛 Nachname</label>
-            <input style={S.input} value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Dein Nachname" />
-          </div>
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={S.label}>📧 E-Mail-Adresse</label>
-          <input style={S.input} type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="deine@email.de" />
-        </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={S.label}>🏫 Klasse / Kürzel</label>
-          <input style={{ ...S.input, background: "#f8fafc", color: "#94a3b8" }} value={user.classOrCode || "Nicht angegeben"} disabled />
-          <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>ℹ️ Diese Information kann nur von Administratoren geändert werden.</div>
-        </div>
-        <button onClick={saveProfile} style={{ padding: "10px 22px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>
-          {saved ? "✓ Gespeichert!" : "💾 Speichern"}
-        </button>
-      </div>
-
-      <div style={{ background: "#fff", borderRadius: 16, padding: 28, border: "1px solid #e2e8f0" }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: t.textPrimary, marginBottom: 20 }}>🔒 Passwort ändern</h2>
-        {[["🔑 Aktuelles Passwort", "current"], ["🆕 Neues Passwort", "newPw"], ["✅ Neues Passwort bestätigen", "confirm"]].map(([lbl, key]) => (
-          <div key={key} style={{ marginBottom: 14 }}>
-            <label style={S.label}>{lbl}</label>
-            <input type="password" style={S.input} value={pwForm[key]} onChange={e => setPwForm(f => ({ ...f, [key]: e.target.value }))} />
-          </div>
-        ))}
-        {pwMsg && <div style={{ padding: "8px 14px", borderRadius: 8, fontSize: 13, marginBottom: 14, background: pwMsg.startsWith("✅") ? "#f0fdf4" : "#fef2f2", color: pwMsg.startsWith("✅") ? "#16a34a" : "#dc2626" }}>{pwMsg}</div>}
-        <button onClick={changePw} style={{ padding: "10px 22px", background: "#1e293b", border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>🔐 Passwort ändern</button>
-      </div>
-    </div>
-  );
-}
-
-// ─── GENERIC PAGE ─────────────────────────────────────────────────────────────
-function GenericPage({ pageKey, page, canEdit, onSave, config }) {
-  const t = config.theme;
-  const [editing, setEditing] = useState(false);
-  const [sections, setSections] = useState(page.sections);
-
-  const update = (id, field, val) => setSections(prev => prev.map(s => s.id === id ? { ...s, [field]: val } : s));
-  const add = () => setSections(prev => [...prev, { id: Date.now(), heading: "📌 Neuer Abschnitt", content: "Inhalt hier..." }]);
-  const remove = (id) => setSections(prev => prev.filter(s => s.id !== id));
-  const save = () => { onSave(pageKey, sections); setEditing(false); };
-
-  return (
-    <div>
-      <div style={{ background: `linear-gradient(135deg,${t.heroBg1},${t.heroBg2})`, padding: "36px 48px", display: "flex", alignItems: "center", gap: 16, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <span style={{ fontSize: 40 }}>{page.icon}</span>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "'Outfit',sans-serif" }}>{page.title}</h1>
-        </div>
-        {canEdit && (
-          <div style={{ display: "flex", gap: 8 }}>
-            {editing
-              ? <><button onClick={save} style={{ padding: "8px 18px", background: t.accent, border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "'Outfit',sans-serif" }}>💾 Speichern</button><button onClick={() => { setSections(page.sections); setEditing(false); }} style={S.cancelBtn}>Abbrechen</button></>
-              : <button onClick={() => setEditing(true)} style={{ padding: "8px 18px", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>✏️ Bearbeiten</button>
-            }
-          </div>
-        )}
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(340px,1fr))", gap: 20, padding: "36px 48px" }}>
-        {sections.map(sec => (
-          <div key={sec.id} style={{ background: "#fff", borderRadius: 14, padding: 24, border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-            {editing
-              ? (<><input style={{ ...S.input, fontWeight: 700, fontSize: 15, marginBottom: 8 }} value={sec.heading} onChange={e => update(sec.id, "heading", e.target.value)} /><textarea style={{ ...S.input, resize: "vertical", minHeight: 80 }} value={sec.content} onChange={e => update(sec.id, "content", e.target.value)} rows={4} /><button onClick={() => remove(sec.id)} style={{ marginTop: 8, padding: "5px 12px", background: "#fef2f2", border: "none", color: "#dc2626", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "'Outfit',sans-serif" }}>🗑️ Entfernen</button></>)
-              : (<><h3 style={{ fontSize: 16, fontWeight: 700, color: t.textPrimary, marginBottom: 10, fontFamily: "'Outfit',sans-serif" }}>{sec.heading}</h3><p style={{ fontSize: 14, color: t.textSecondary, lineHeight: 1.7 }}>{sec.content}</p></>)
-            }
-          </div>
-        ))}
-        {editing && <div onClick={add} style={{ background: "#f8fafc", borderRadius: 14, padding: 24, border: "2px dashed #cbd5e1", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, color: "#94a3b8", cursor: "pointer", minHeight: 120, fontSize: 14 }}><span style={{ fontSize: 28 }}>＋</span><span>Abschnitt hinzufügen</span></div>}
-      </div>
-    </div>
-  );
-}
-
-// ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
-function AdminPanel({ user, roles, setRoles, users, setUsers, config, setConfig, adminView, setAdminView, tasks, setTasks, news, setNews }) {
-  const can = (p) => hasPerm(user, roles, p);
-  const sideItems = [
-    { id: "dashboard", label: "📊 Übersicht", always: true },
-    { id: "users", label: "👥 Benutzer", perm: "manage_users" },
-    { id: "roles", label: "🛡️ Rollen", perm: "manage_roles" },
-    { id: "tasks", label: "✅ Aufgaben", perm: "manage_tasks" },
-    { id: "news", label: "📰 News", perm: "manage_news" },
-    { id: "nav", label: "🔗 Navigation", perm: "manage_nav" },
-    { id: "theme", label: "🎨 Design", perm: "manage_theme" },
-  ].filter(i => i.always || can(i.perm));
-
-  return (
-    <div style={{ display: "flex", minHeight: "calc(100vh - 60px)" }}>
-      <div style={{ width: 210, background: "#0a0f1e", padding: "20px 12px", flexShrink: 0, borderRight: "1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#334155", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12, paddingLeft: 10 }}>⚙️ Admin-Panel</div>
-        {sideItems.map(i => (
-          <button key={i.id} onClick={() => setAdminView(i.id)} style={{ display: "block", width: "100%", padding: "9px 12px", background: adminView === i.id ? "rgba(56,189,248,0.12)" : "transparent", border: "none", color: adminView === i.id ? "#38bdf8" : "#94a3b8", cursor: "pointer", borderRadius: 8, fontSize: 13, fontFamily: "'Outfit',sans-serif", textAlign: "left", marginBottom: 2, fontWeight: adminView === i.id ? 700 : 400 }}>{i.label}</button>
-        ))}
-      </div>
-      <div style={{ flex: 1, padding: "32px 40px", background: "#f0f4f8", overflowY: "auto" }}>
-        {adminView === "dashboard" && <AdminOverview users={users} roles={roles} tasks={tasks} news={news} />}
-        {adminView === "users" && can("manage_users") && <UserManager users={users} setUsers={setUsers} roles={roles} />}
-        {adminView === "roles" && can("manage_roles") && <RoleManager roles={roles} setRoles={setRoles} />}
-        {adminView === "tasks" && can("manage_tasks") && <TaskManager tasks={tasks} setTasks={setTasks} users={users} currentUser={user} />}
-        {adminView === "news" && can("manage_news") && <NewsManager news={news} setNews={setNews} users={users} currentUser={user} />}
-        {adminView === "nav" && can("manage_nav") && <NavManager config={config} setConfig={setConfig} roles={roles} />}
-        {adminView === "theme" && can("manage_theme") && <ThemeManager config={config} setConfig={setConfig} />}
-      </div>
-    </div>
-  );
-}
-
-function AdminOverview({ users, roles, tasks, news }) {
-  return (
-    <div>
-      <h2 style={S.adminH2}>📊 Übersicht</h2>
-      <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
-        {[["Benutzer", users.length, "👥"], ["Rollen", roles.length, "🛡️"], ["Aktiv", users.filter(u => u.active).length, "✅"], ["Aufgaben", tasks.length, "📋"], ["News", news.length, "📰"]].map(([l, n, i]) => (
-          <div key={l} style={{ background: "#fff", borderRadius: 14, padding: "20px 28px", border: "1px solid #e2e8f0", minWidth: 100, textAlign: "center" }}>
-            <div style={{ fontSize: 28 }}>{i}</div>
-            <div style={{ fontSize: 30, fontWeight: 800, color: "#2563eb", fontFamily: "'Outfit',sans-serif" }}>{n}</div>
-            <div style={{ fontSize: 13, color: "#64748b" }}>{l}</div>
-          </div>
-        ))}
-      </div>
-      <h3 style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 14 }}>👥 Benutzerübersicht</h3>
-      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr>{["Name", "E-Mail", "Klasse/Kürzel", "Rolle", "Status"].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
-          <tbody>{users.map(u => (
-            <tr key={u.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-              <td style={S.td}><strong>{getUserDisplayName(u)}</strong><div style={{ fontSize: 11, color: "#94a3b8" }}>@{u.username}</div></td>
-              <td style={S.td}>{u.email}</td>
-              <td style={S.td}>{u.classOrCode || "-"}</td>
-              <td style={S.td}><span style={S.rolePill}>{u.role}</span></td>
-              <td style={S.td}><span style={{ padding: "3px 10px", borderRadius: 99, fontSize: 12, fontWeight: 600, color: "#fff", background: u.active ? "#22c55e" : "#ef4444" }}>{u.active ? "Aktiv" : "Inaktiv"}</span></td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function TaskManager({ tasks, setTasks, users, currentUser }) {
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", assignedTo: "", dueDate: "" });
-
-  const save = () => {
-    if (!form.title || !form.assignedTo || !form.dueDate) return;
-    setTasks(prev => [...prev, { ...form, id: Date.now(), assignedTo: parseInt(form.assignedTo), completed: false, createdBy: currentUser.id }]);
-    setForm({ title: "", description: "", assignedTo: "", dueDate: "" });
-    setShowForm(false);
-  };
-
-  const remove = (id) => { if (confirm("Aufgabe löschen?")) setTasks(prev => prev.filter(t => t.id !== id)); };
-  const toggleComplete = (id) => setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={S.adminH2}>✅ Aufgabenverwaltung</h2>
-        <button onClick={() => setShowForm(true)} style={S.primaryBtn}>+ Aufgabe zuweisen</button>
-      </div>
-
-      {showForm && (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 28, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-          <h3 style={{ margin: "0 0 18px", fontSize: 15, fontWeight: 700 }}>📝 Neue Aufgabe</h3>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>📌 Titel</label>
-            <input style={S.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Aufgabentitel..." />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>📝 Beschreibung</label>
-            <textarea style={{ ...S.input, minHeight: 60 }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optionale Beschreibung..." />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={S.label}>👤 Zuweisen an</label>
-              <select style={S.input} value={form.assignedTo} onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}>
-                <option value="">Benutzer wählen...</option>
-                {users.filter(u => u.active).map(u => <option key={u.id} value={u.id}>{getUserDisplayName(u)} (@{u.username})</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={S.label}>📅 Fällig am</label>
-              <input type="date" style={S.input} value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))} />
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={S.primaryBtn}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr>{["Aufgabe", "Zugewiesen an", "Fällig", "Status", "Aktionen"].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
-          <tbody>
-            {tasks.length === 0 && <tr><td colSpan={5} style={{ ...S.td, textAlign: "center", color: "#94a3b8" }}>Keine Aufgaben vorhanden</td></tr>}
-            {tasks.map(t => {
-              const assignee = users.find(u => u.id === t.assignedTo);
-              return (
-                <tr key={t.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={S.td}>
-                    <strong style={{ textDecoration: t.completed ? "line-through" : "none" }}>{t.title}</strong>
-                    {t.description && <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>{t.description}</div>}
-                  </td>
-                  <td style={S.td}>{assignee ? getUserDisplayName(assignee) : "Unbekannt"}</td>
-                  <td style={S.td}>{formatDate(t.dueDate)}</td>
-                  <td style={S.td}>
-                    <span style={{ padding: "3px 10px", borderRadius: 99, fontSize: 12, fontWeight: 600, color: "#fff", background: t.completed ? "#22c55e" : "#f59e0b" }}>
-                      {t.completed ? "✓ Erledigt" : "⏳ Offen"}
-                    </span>
-                  </td>
-                  <td style={S.td}>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => toggleComplete(t.id)} style={S.iconBtn}>{t.completed ? "↩️" : "✓"}</button>
-                      <button onClick={() => remove(t.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>
+                  <h2 class="text-lg font-bold mb-4 text-gray-800">🔐 Portal-Anmeldung</h2>
+                  <form onSubmit={handleLogin} class="space-y-4">
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-600 mb-1">BENUTZERNAME</label>
+                      <input type="text" value={usernameInput} onChange={e => setUsernameInput(e.target.value)} class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38bdf8]" placeholder="z.B. louis" required />
                     </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function NewsManager({ news, setNews, users, currentUser }) {
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", content: "", image: null });
-  const [editId, setEditId] = useState(null);
-  const fileRef = useRef();
-
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => setForm(f => ({ ...f, image: ev.target.result }));
-    reader.readAsDataURL(file);
-  };
-
-  const save = () => {
-    if (!form.title) return;
-    const entry = { ...form, date: new Date().toISOString().split("T")[0], authorId: currentUser.id };
-    if (editId) {
-      setNews(prev => prev.map(n => n.id === editId ? { ...n, ...entry } : n));
-    } else {
-      setNews(prev => [{ ...entry, id: Date.now() }, ...prev]);
-    }
-    setForm({ title: "", content: "", image: null }); setShowForm(false); setEditId(null);
-  };
-
-  const remove = (id) => { if (confirm("News löschen?")) setNews(prev => prev.filter(n => n.id !== id)); };
-  const startEdit = (n) => { setForm({ title: n.title, content: n.content, image: n.image || null }); setEditId(n.id); setShowForm(true); };
-
-  const getAuthorInfo = (authorId) => {
-    const author = users.find(u => u.id === authorId);
-    if (!author) return { name: "Unbekannt", code: "" };
-    return { name: getUserDisplayName(author), code: author.classOrCode || "" };
-  };
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={S.adminH2}>📰 News verwalten</h2>
-        <button onClick={() => { setForm({ title: "", content: "", image: null }); setEditId(null); setShowForm(true); }} style={S.primaryBtn}>+ News hinzufügen</button>
-      </div>
-
-      {showForm && (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 28, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-          <h3 style={{ margin: "0 0 18px", fontSize: 15, fontWeight: 700 }}>{editId ? "✏️ News bearbeiten" : "📝 Neue News"}</h3>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>📌 Titel</label>
-            <input style={S.input} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Titel..." />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>📝 Text</label>
-            <textarea style={{ ...S.input, minHeight: 100, resize: "vertical" }} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Inhalt..." />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={S.label}>🖼️ Bild (optional)</label>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <button onClick={() => fileRef.current.click()} style={{ padding: "8px 16px", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif" }}>📷 Bild wählen</button>
-              {form.image && <span style={{ fontSize: 12, color: "#22c55e" }}>✓ Bild geladen</span>}
-              {form.image && <button onClick={() => setForm(f => ({ ...f, image: null }))} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>✕</button>}
-            </div>
-            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImage} />
-            {form.image && <img src={form.image} alt="" style={{ marginTop: 10, maxHeight: 120, borderRadius: 8, border: "1px solid #e2e8f0" }} />}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={S.primaryBtn}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {news.map(n => {
-          const author = getAuthorInfo(n.authorId);
-          return (
-            <div key={n.id} style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: 14 }}>
-              {n.image && <img src={n.image} alt="" style={{ width: 50, height: 50, borderRadius: 8, objectFit: "cover" }} />}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{n.title}</div>
-                <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>📅 {formatDate(n.date)} · ✍️ {author.name} {author.code && `(${author.code})`}</div>
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => startEdit(n)} style={S.iconBtn}>✏️</button>
-                <button onClick={() => remove(n.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>
-              </div>
-            </div>
-          );
-        })}
-        {news.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8", padding: "48px 0" }}>📭 Noch keine News vorhanden.</div>}
-      </div>
-    </div>
-  );
-}
-
-function UserManager({ users, setUsers, roles }) {
-  const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ username: "", newPassword: "", email: "", firstName: "", lastName: "", classOrCode: "", role: roles[0]?.name || "", active: true });
-
-  const openNew = () => { setForm({ username: "", newPassword: "", email: "", firstName: "", lastName: "", classOrCode: "", role: roles[0]?.name || "", active: true }); setEditId(null); setShowForm(true); };
-  const openEdit = (u) => { setForm({ username: u.username, newPassword: "", email: u.email, firstName: u.firstName || "", lastName: u.lastName || "", classOrCode: u.classOrCode || "", role: u.role, active: u.active }); setEditId(u.id); setShowForm(true); };
-
-  const save = () => {
-    if (!form.username || !form.email) return;
-    if (editId) {
-      setUsers(prev => prev.map(u => {
-        if (u.id !== editId) return u;
-        const updated = { ...u, username: form.username, email: form.email, firstName: form.firstName, lastName: form.lastName, classOrCode: form.classOrCode, role: form.role, active: form.active };
-        if (form.newPassword) updated.passwordHash = form.newPassword;
-        return updated;
-      }));
-    } else {
-      if (!form.newPassword) return alert("Bitte ein Passwort vergeben.");
-      setUsers(prev => [...prev, { id: Date.now(), username: form.username, passwordHash: form.newPassword, email: form.email, firstName: form.firstName, lastName: form.lastName, classOrCode: form.classOrCode, role: form.role, active: form.active }]);
-    }
-    setShowForm(false);
-  };
-
-  const toggle = (id) => setUsers(prev => prev.map(u => u.id === id ? { ...u, active: !u.active } : u));
-  const remove = (id) => { if (confirm("Benutzer wirklich löschen?")) setUsers(prev => prev.filter(u => u.id !== id)); };
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={S.adminH2}>👥 Benutzerverwaltung</h2>
-        <button onClick={openNew} style={S.primaryBtn}>+ Neuer Benutzer</button>
-      </div>
-      {showForm && (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 28, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-          <h3 style={{ margin: "0 0 18px", fontSize: 15, fontWeight: 700 }}>{editId ? "✏️ Benutzer bearbeiten" : "📝 Neuer Benutzer"}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={S.label}>👤 Benutzername (Login)</label>
-              <input style={S.input} value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} />
-            </div>
-            <div>
-              <label style={S.label}>📧 E-Mail</label>
-              <input type="email" style={S.input} value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-            </div>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={S.label}>📛 Vorname</label>
-              <input style={S.input} value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder="Max" />
-            </div>
-            <div>
-              <label style={S.label}>📛 Nachname</label>
-              <input style={S.input} value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Mustermann" />
-            </div>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={S.label}>🏫 Klasse / Kürzel</label>
-              <input style={S.input} value={form.classOrCode} onChange={e => setForm(f => ({ ...f, classOrCode: e.target.value }))} placeholder="z.B. 10a oder MKT" />
-            </div>
-            <div>
-              <label style={S.label}>🛡️ Rolle</label>
-              <select style={S.input} value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
-                {roles.map(r => <option key={r.id}>{r.name}</option>)}
-              </select>
-            </div>
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>{editId ? "🔑 Neues Passwort (leer = unverändert)" : "🔑 Passwort"}</label>
-            <input type="password" style={S.input} value={form.newPassword} onChange={e => setForm(f => ({ ...f, newPassword: e.target.value }))} placeholder={editId ? "Leer lassen = nicht ändern" : "Passwort vergeben"} />
-            <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>⚠️ Passwörter werden nicht angezeigt – nur neu setzen möglich</div>
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#374151" }}>
-              <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} /> ✅ Aktiv
-            </label>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={S.primaryBtn}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr>{["Name", "E-Mail", "Klasse/Kürzel", "Rolle", "Status", "Aktionen"].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
-          <tbody>{users.map(u => (
-            <tr key={u.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-              <td style={S.td}><strong>{getUserDisplayName(u)}</strong><div style={{ fontSize: 11, color: "#94a3b8" }}>@{u.username}</div></td>
-              <td style={S.td}>{u.email}</td>
-              <td style={S.td}>{u.classOrCode || "-"}</td>
-              <td style={S.td}><span style={S.rolePill}>{u.role}</span></td>
-              <td style={S.td}><span style={{ padding: "3px 10px", borderRadius: 99, fontSize: 12, fontWeight: 600, color: "#fff", background: u.active ? "#22c55e" : "#ef4444" }}>{u.active ? "Aktiv" : "Inaktiv"}</span></td>
-              <td style={S.td}>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => openEdit(u)} style={S.iconBtn}>✏️</button>
-                  <button onClick={() => toggle(u.id)} style={S.iconBtn}>{u.active ? "🔒" : "🔓"}</button>
-                  <button onClick={() => remove(u.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-600 mb-1">PASSWORT</label>
+                      <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38bdf8]" placeholder="••••••" required />
+                    </div>
+                    {loginError && <p class="text-sm text-red-500 font-medium">{loginError}</p>}
+                    <button type="submit" class="w-full py-2 bg-[#38bdf8] hover:bg-[#0284c7] text-white font-bold rounded-lg transition shadow-md">Anmelden</button>
+                  </form>
+                  <p class="text-center text-xs text-gray-400 mt-6">Tipp zum Testen: Benutzer: <span class="font-mono text-gray-600">louis</span> | Passwort: <span class="font-mono text-gray-600">louis</span></p>
                 </div>
-              </td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function RoleManager({ roles, setRoles }) {
-  const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ name: "", permissions: [] });
-
-  const openNew = () => { setForm({ name: "", permissions: [] }); setEditId(null); setShowForm(true); };
-  const openEdit = (r) => { setForm({ name: r.name, permissions: [...r.permissions] }); setEditId(r.id); setShowForm(true); };
-  const togglePerm = (p) => setForm(f => ({ ...f, permissions: f.permissions.includes(p) ? f.permissions.filter(x => x !== p) : [...f.permissions, p] }));
-  const save = () => {
-    if (!form.name) return;
-    if (editId) setRoles(prev => prev.map(r => r.id === editId ? { ...r, ...form } : r));
-    else setRoles(prev => [...prev, { ...form, id: Date.now() }]);
-    setShowForm(false);
-  };
-  const remove = (id) => { if (confirm("Rolle löschen?")) setRoles(prev => prev.filter(r => r.id !== id)); };
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={S.adminH2}>🛡️ Rollenverwaltung</h2>
-        <button onClick={openNew} style={S.primaryBtn}>+ Neue Rolle</button>
-      </div>
-      {showForm && (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 28, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-          <h3 style={{ margin: "0 0 18px", fontSize: 15, fontWeight: 700 }}>{editId ? "✏️ Rolle bearbeiten" : "📝 Neue Rolle"}</h3>
-          <div style={{ marginBottom: 16 }}>
-            <label style={S.label}>📛 Rollenname</label>
-            <input style={S.input} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="z.B. Veranstaltungshelfer" />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={S.label}>🔐 Berechtigungen</label>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 8, marginTop: 6 }}>
-              {ALL_PERMISSIONS.map(p => (
-                <label key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", border: `2px solid ${form.permissions.includes(p.id) ? "#38bdf8" : "#e2e8f0"}`, borderRadius: 10, cursor: "pointer", fontSize: 13, background: form.permissions.includes(p.id) ? "#f0f9ff" : "#fff", color: form.permissions.includes(p.id) ? "#0369a1" : "#475569", fontWeight: form.permissions.includes(p.id) ? 600 : 400 }}>
-                  <input type="checkbox" style={{ display: "none" }} checked={form.permissions.includes(p.id)} onChange={() => togglePerm(p.id)} />
-                  <span>{p.icon}</span><span>{p.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={S.primaryBtn}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14 }}>
-        {roles.map(r => (
-          <div key={r.id} style={{ background: "#fff", borderRadius: 14, padding: 20, border: "1px solid #e2e8f0" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", fontFamily: "'Outfit',sans-serif" }}>🛡️ {r.name}</span>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => openEdit(r)} style={S.iconBtn}>✏️</button>
-                <button onClick={() => remove(r.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>
               </div>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {r.permissions.map(p => { const def = ALL_PERMISSIONS.find(x => x.id === p); return <span key={p} style={{ padding: "3px 10px", background: "#f0fdf4", color: "#16a34a", borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{def?.icon} {def?.label}</span>; })}
-              {r.permissions.length === 0 && <span style={{ color: "#94a3b8", fontSize: 13 }}>Keine Berechtigungen</span>}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+            );
+          }
 
-function NavManager({ config, setConfig, roles }) {
-  const [items, setItems] = useState(config.navItems);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ label: "", type: "internal", target: "", roles: [] });
-  const [editId, setEditId] = useState(null);
-
-  const save = () => {
-    if (!form.label || !form.target) return;
-    if (editId) {
-      setItems(prev => prev.map(i => i.id === editId ? { ...i, ...form } : i));
-    } else {
-      setItems(prev => [...prev, { ...form, id: "nav_" + Date.now() }]);
-    }
-    setForm({ label: "", type: "internal", target: "", roles: [] }); setShowForm(false); setEditId(null);
-  };
-
-  const remove = (id) => setItems(prev => prev.filter(i => i.id !== id));
-  const openEdit = (item) => { setForm({ label: item.label, type: item.type, target: item.target, roles: item.roles || [] }); setEditId(item.id); setShowForm(true); };
-  const apply = () => setConfig(c => ({ ...c, navItems: items }));
-  const toggleRole = (r) => setForm(f => ({ ...f, roles: f.roles.includes(r) ? f.roles.filter(x => x !== r) : [...f.roles, r] }));
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <h2 style={S.adminH2}>🔗 Navigation verwalten</h2>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => { setForm({ label: "", type: "internal", target: "", roles: [] }); setEditId(null); setShowForm(true); }} style={S.primaryBtn}>+ Hinzufügen</button>
-          <button onClick={apply} style={{ ...S.primaryBtn, background: "#16a34a" }}>✓ Änderungen speichern</button>
-        </div>
-      </div>
-      <p style={{ color: "#64748b", fontSize: 13, marginBottom: 20 }}>Reihenfolge der Einträge bestimmt die Anzeige in der Navigation. Nach Änderungen auf "Speichern" klicken.</p>
-
-      {showForm && (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 24, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-          <h3 style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700 }}>{editId ? "✏️ Eintrag bearbeiten" : "📝 Neuer Navigationseintrag"}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={S.label}>📌 Bezeichnung</label>
-              <input style={S.input} value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} placeholder="z.B. 📅 Events" />
-            </div>
-            <div>
-              <label style={S.label}>🔄 Typ</label>
-              <select style={S.input} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-                <option value="internal">Interne Seite</option>
-                <option value="external">Externe URL</option>
-              </select>
-            </div>
-          </div>
-          <div style={{ marginBottom: 14 }}>
-            <label style={S.label}>{form.type === "external" ? "🔗 URL (z.B. [...](https://...)" : "📄 Seiten-Schlüssel (z.B. ipad, faq, benutzer, home, kalender)"}</label>
-            <input style={S.input} value={form.target} onChange={e => setForm(f => ({ ...f, target: e.target.value }))} placeholder={form.type === "external" ? "[example.com](https://example.com)" : "ipad"} />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={S.label}>🔒 Nur für bestimmte Rollen (leer = alle sehen es)</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
-              {roles.map(r => (
-                <label key={r.id} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", border: `2px solid ${form.roles.includes(r.name) ? "#38bdf8" : "#e2e8f0"}`, borderRadius: 8, cursor: "pointer", fontSize: 13, background: form.roles.includes(r.name) ? "#f0f9ff" : "#fff", color: form.roles.includes(r.name) ? "#0369a1" : "#475569" }}>
-                  <input type="checkbox" style={{ display: "none" }} checked={form.roles.includes(r.name)} onChange={() => toggleRole(r.name)} />{r.name}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={S.primaryBtn}>💾 Speichern</button>
-            <button onClick={() => setShowForm(false)} style={S.cancelBtn}>Abbrechen</button>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {items.map((item, idx) => (
-          <div key={item.id} style={{ background: "#fff", borderRadius: 12, padding: "14px 18px", border: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <button onClick={() => { if (idx > 0) { const a = [...items]; [a[idx], a[idx - 1]] = [a[idx - 1], a[idx]]; setItems(a); } }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#94a3b8" }}>▲</button>
-              <button onClick={() => { if (idx < items.length - 1) { const a = [...items]; [a[idx], a[idx + 1]] = [a[idx + 1], a[idx]]; setItems(a); } }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#94a3b8" }}>▼</button>
-            </div>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontWeight: 700, color: "#0f172a", fontSize: 14 }}>{item.label}</span>
-              <span style={{ marginLeft: 10, fontSize: 12, color: "#64748b" }}>{item.type === "external" ? "↗ " + item.target : "→ /" + item.target}</span>
-              {item.roles?.length > 0 && <span style={{ marginLeft: 8, fontSize: 11, color: "#7c3aed", background: "#f5f3ff", padding: "2px 8px", borderRadius: 4 }}>🔒 {item.roles.join(", ")}</span>}
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={() => openEdit(item)} style={S.iconBtn}>✏️</button>
-              <button onClick={() => remove(item.id)} style={{ ...S.iconBtn, color: "#ef4444" }}>🗑️</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ThemeManager({ config, setConfig }) {
-  const [theme, setTheme] = useState(config.theme);
-  const [siteName, setSiteName] = useState(config.siteName);
-  const [siteTagline, setSiteTagline] = useState(config.siteTagline);
-  const [heroSubtitle, setHeroSubtitle] = useState(config.heroSubtitle);
-  const [noTasksMessage, setNoTasksMessage] = useState(config.noTasksMessage);
-  const [logo, setLogo] = useState(config.logo);
-  const logoRef = useRef();
-
-  const handleLogo = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => setLogo(ev.target.result);
-    reader.readAsDataURL(file);
-  };
-
-  const apply = () => setConfig(c => ({ ...c, theme, siteName, siteTagline, heroSubtitle, noTasksMessage, logo }));
-  const reset = () => { setTheme(DEFAULT_CONFIG.theme); setSiteName(DEFAULT_CONFIG.siteName); setSiteTagline(DEFAULT_CONFIG.siteTagline); setHeroSubtitle(DEFAULT_CONFIG.heroSubtitle); setNoTasksMessage(DEFAULT_CONFIG.noTasksMessage); setLogo(null); };
-
-  const colorFields = [
-    ["🎨 Navigationsleiste Hintergrund", "navBg"],
-    ["📝 Navigationsleiste Text", "navText"],
-    ["✨ Aktiver Navigations-Link", "navActive"],
-    ["💎 Hauptfarbe (Accent)", "accent"],
-    ["🌈 Zweite Akzentfarbe", "accentSecondary"],
-    ["🌅 Hero-Hintergrund (oben)", "heroBg1"],
-    ["🌄 Hero-Hintergrund (unten)", "heroBg2"],
-    ["📄 Seiten-Hintergrund", "bodyBg"],
-    ["📦 Karten-Hintergrund", "cardBg"],
-    ["📖 Primärtext", "textPrimary"],
-    ["📝 Sekundärtext", "textSecondary"],
-  ];
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={S.adminH2}>🎨 Design anpassen</h2>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={reset} style={{ ...S.cancelBtn, background: "#fff" }}>↩️ Zurücksetzen</button>
-          <button onClick={apply} style={S.primaryBtn}>✓ Design anwenden</button>
-        </div>
-      </div>
-
-      <div style={{ background: "#fff", borderRadius: 14, padding: 24, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>🏢 Website-Informationen</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-          <div>
-            <label style={S.label}>📛 Website-Name</label>
-            <input style={S.input} value={siteName} onChange={e => setSiteName(e.target.value)} />
-          </div>
-          <div>
-            <label style={S.label}>🏷️ Hero-Untertitel</label>
-            <input style={S.input} value={heroSubtitle} onChange={e => setHeroSubtitle(e.target.value)} placeholder="z.B. Schülerfirma • HBG Dortmund" />
-          </div>
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={S.label}>📝 Tagline (Beschreibung)</label>
-          <input style={S.input} value={siteTagline} onChange={e => setSiteTagline(e.target.value)} placeholder="Dein internes Portal für..." />
-        </div>
-        <div>
-          <label style={S.label}>📭 Nachricht wenn keine Aufgaben</label>
-          <input style={S.input} value={noTasksMessage} onChange={e => setNoTasksMessage(e.target.value)} placeholder="Zurzeit wurden Ihnen keine Aufgaben zugeteilt..." />
-        </div>
-      </div>
-
-      <div style={{ background: "#fff", borderRadius: 14, padding: 24, border: "1px solid #e2e8f0", marginBottom: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>🖼️ Logo</h3>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {logo ? (
-            <img src={logo} alt="Logo" style={{ width: 80, height: 80, borderRadius: 12, objectFit: "contain", border: "1px solid #e2e8f0" }} />
-          ) : (
-            <div style={{ width: 80, height: 80, borderRadius: 12, background: "#f8fafc", border: "2px dashed #cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 32 }}>⚡</div>
-          )}
-          <div>
-            <button onClick={() => logoRef.current.click()} style={{ padding: "8px 16px", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif", marginRight: 8 }}>📷 Logo hochladen</button>
-            {logo && <button onClick={() => setLogo(null)} style={{ padding: "8px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif", color: "#dc2626" }}>🗑️ Entfernen</button>}
-            <input ref={logoRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogo} />
-            <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>Empfohlen: 200x200px, PNG oder SVG</div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ background: "#fff", borderRadius: 14, padding: 24, border: "1px solid #e2e8f0" }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>🎨 Farben</h3>
-        <p style={{ fontSize: 12, color: "#94a3b8", marginBottom: 20 }}>Klicke auf das Farbfeld zum Ändern. Hex-Werte können auch manuell eingegeben werden.</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 12 }}>
-          {colorFields.map(([lbl, key]) => (
-            <div key={key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", border: "1px solid #e2e8f0", borderRadius: 10 }}>
-              <input type="color" value={theme[key]} onChange={e => setTheme(t => ({ ...t, [key]: e.target.value }))} style={{ width: 40, height: 40, border: "none", borderRadius: 8, cursor: "pointer", padding: 2 }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{lbl}</div>
-                <input value={theme[key]} onChange={e => setTheme(t => ({ ...t, [key]: e.target.value }))} style={{ fontSize: 12, color: "#64748b", background: "none", border: "none", outline: "none", width: "100%", fontFamily: "monospace", padding: 0 }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── SHARED STYLES ────────────────────────────────────────────────────────────
-const S = {
-  label: { display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 5 },
-  input: { width: "100%", padding: "10px 13px", border: "2px solid #e2e8f0", borderRadius: 9, fontSize: 14, fontFamily: "'Outfit',sans-serif", outline: "none", color: "#1e293b", background: "#fff" },
-  cancelBtn: { padding: "9px 18px", background: "#f1f5f9", border: "1px solid #e2e8f0", color: "#374151", borderRadius: 8, cursor: "pointer", fontSize: 13, fontFamily: "'Outfit',sans-serif" },
-  primaryBtn: { padding: "9px 20px", background: "#2563eb", border: "none", color: "#fff", borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: 700, fontFamily: "'Outfit',sans-serif" },
-  iconBtn: { padding: "5px 10px", background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 6, cursor: "pointer", fontSize: 14 },
-  th: { padding: "11px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", background: "#f8fafc", borderBottom: "1px solid #e2e8f0" },
-  td: { padding: "12px 16px", fontSize: 14, color: "#374151" },
-  rolePill: { padding: "3px 10px", background: "#eff6ff", color: "#2563eb", borderRadius: 99, fontSize: 12, fontWeight: 600 },
-  adminH2: { fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 20, fontFamily: "'Outfit',sans-serif" },
-};
-
-// ─── APP ROOT ─────────────────────────────────────────────────────────────────
-export default function App() {
-  const [users, setUsers] = useLocalStorage("hbgit_users", DEFAULT_USERS);
-  const [roles, setRoles] = useLocalStorage("hbgit_roles", DEFAULT_ROLES);
-  const [config, setConfig] = useLocalStorage("hbgit_config", DEFAULT_CONFIG);
-  const [news, setNews] = useLocalStorage("hbgit_news", DEFAULT_NEWS);
-  const [faq, setFaq] = useLocalStorage("hbgit_faq", DEFAULT_FAQ);
-  const [pages, setPages] = useLocalStorage("hbgit_pages", DEFAULT_PAGES);
-  const [tasks, setTasks] = useLocalStorage("hbgit_tasks", DEFAULT_TASKS);
-  const [calendarEvents, setCalendarEvents] = useLocalStorage("hbgit_calendar", DEFAULT_CALENDAR_EVENTS);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [activePage, setActivePage] = useState("home");
-  const [adminView, setAdminView] = useState(null);
-
-  useEffect(() => {
-    if (currentUser) {
-      const updated = users.find(u => u.id === currentUser.id);
-      if (updated) setCurrentUser(updated);
-    }
-  }, [users]);
-
-  const login = (u) => { setCurrentUser(u); setActivePage("home"); };
-  const logout = () => { setCurrentUser(null); setActivePage("home"); setAdminView(null); };
-  const savePage = (key, sections) => setPages(prev => ({ ...prev, [key]: { ...prev[key], sections } }));
-
-  const t = config.theme;
-  const canManageNews = currentUser && hasPerm(currentUser, roles, "manage_news");
-  const isAdmin = currentUser && hasPerm(currentUser, roles, "admin_panel");
-
-  return (
-    <div style={{ minHeight: "100vh", background: t.bodyBg, fontFamily: "'Outfit',sans-serif" }}>
-      <style>{`
-        @import url('[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap)');
-        *{box-sizing:border-box;margin:0;padding:0;}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-        button:hover{filter:brightness(1.08);}
-        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#f1f5f9}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
-      `}</style>
-
-      {!currentUser && <LoginModal onLogin={login} users={users} config={config} />}
-
-      {currentUser && (
-        <>
-          <Navbar user={currentUser} roles={roles} config={config} activePage={activePage} setActivePage={setActivePage} setAdminView={setAdminView} onLogout={logout} canManageNews={canManageNews && !isAdmin} />
-          <main style={{ animation: "fadeIn 0.3s ease" }}>
-            {adminView
-              ? <AdminPanel user={currentUser} roles={roles} setRoles={setRoles} users={users} setUsers={setUsers} config={config} setConfig={setConfig} adminView={adminView} setAdminView={setAdminView} tasks={tasks} setTasks={setTasks} news={news} setNews={setNews} />
-              : activePage === "home"
-                ? <HomePage user={currentUser} roles={roles} news={news} setNews={setNews} config={config} users={users} tasks={tasks} setTasks={setTasks} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
-                : activePage === "kalender"
-                  ? <CalendarPage user={currentUser} roles={roles} config={config} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
-                  : activePage === "faq"
-                    ? <FAQPage user={currentUser} roles={roles} faq={faq} setFaq={setFaq} config={config} />
-                    : activePage === "benutzer"
-                      ? <AccountPage user={currentUser} setUsers={setUsers} config={config} />
-                      : activePage === "news-manage" && canManageNews && !isAdmin
-                        ? <NewsManagePage user={currentUser} roles={roles} news={news} setNews={setNews} config={config} users={users} />
-                        : pages[activePage]
-                          ? <GenericPage pageKey={activePage} page={pages[activePage]} canEdit={hasPerm(currentUser, roles, "edit_pages")} onSave={savePage} config={config} />
-                          : <div style={{ padding: "80px 48px", textAlign: "center", color: "#94a3b8" }}>🔍 Seite nicht gefunden.</div>
-            }
-          </main>
-        </>
-      )}
-    </div>
-  );
-}
-
-    
-    </script>
-
-</body>
-</html>
-
+          // ─── PLATTFORM-OBERFLÄCHE (EINGELOGGT) ──────────────────────────────
+          return (
+            <div class="min-h-screen flex flex-col">
